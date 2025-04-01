@@ -77,16 +77,25 @@ do
                 spawn(function() 
                     while CircleTeleportationActive do
                         local player = game.Players.LocalPlayer
+                        local targetRing = workspace:FindFirstChild("Interiors") 
+                                           and workspace.Interiors:FindFirstChild("IceDimension") 
+                                           and workspace.Interiors.IceDimension:FindFirstChild("JoinZones") 
+                                           and workspace.Interiors.IceDimension.JoinZones:FindFirstChild("IceCubeHillMinigame") 
+                                           and workspace.Interiors.IceDimension.JoinZones.IceCubeHillMinigame:FindFirstChild("Ring")
+
                         if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                            player.Character.HumanoidRootPart.CFrame = workspace.Interiors.IceDimension.JoinZones.IceCubeHillMinigame.Ring.CFrame
+                            -- Teleport to the Ring if it exists
+                            if targetRing then
+                                player.Character.HumanoidRootPart.CFrame = targetRing.CFrame
+                            end
                         end
 
-                        -- Wait for 7 seconds before the next teleport
+                        -- Wait for 7 seconds before the next teleport attempt
                         wait(7)
                     end
                 end)
 
-                print("Circle Teleportation Stopped")
+                print("Circle Teleportation Started")
             else
                 print("Circle Teleportation Disabled")
             end
