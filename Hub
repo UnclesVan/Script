@@ -13,75 +13,113 @@ local Window = Fluent:CreateWindow({
 })
 
 local Tabs = {
+    ScriptHub = Window:AddTab({ Title = "Script Hub", Icon = "leaf" }),
     AutoFarm = Window:AddTab({ Title = "Auto Farm", Icon = "money" }),
     Visuals = Window:AddTab({ Title = "UI Visual", Icon = "paintbrush" })
 }
 
--- Auto Farm Tab
+-- SCRIPT HUB TAB
 do
-    Tabs.AutoFarm:AddButton({
-        Title = "Execute Prodigy X Script", -- Button name
-        Description = "Load Prodigy X script from GitHub.", -- Description
+    -- Prodigy X Script
+    Tabs.ScriptHub:AddButton({
+        Title = "Execute Prodigy X Script",
+        Description = "Load Prodigy X script from GitHub.",
         Callback = function()
-            loadstring(game:HttpGet('https://raw.githubusercontent.com/ReQiuYTPL/hub/main/ReQiuYTPLHub.lua', true))()
-            print("Prodigy X Script executed.")
+            loadstring(game:HttpGet(('https://raw.githubusercontent.com/ReQiuYTPL/hub/main/ReQiuYTPLHub.lua'), true))()
         end
     })
 
-    Tabs.AutoFarm:AddButton({
-        Title = "Execute TBI Ice Dimension Farm", -- Button name
-        Description = "Load TBI Ice Dimension Farm script.", -- Description
-        Callback = function()
-            loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/101333658c343905d93a1433b9916ebc.lua"))()
-            print("TBI Ice Dimension Farm executed.")
-        end
-    })
-
-    Tabs.AutoFarm:AddButton({
-        Title = "Execute TBI Pet Farm", -- Button name
-        Description = "Load TBI Pet Farm script.", -- Description
+    -- TBI PET FARM
+    Tabs.ScriptHub:AddButton({
+        Title = "Execute TBI Pet Farm",
+        Description = "Load TBI Pet Farm script.",
         Callback = function()
             loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/c29af06acdb7a80fb239415fd322efe9.lua"))()
-            print("TBI Pet Farm executed.")
         end
     })
 
-    Tabs.AutoFarm:AddButton({
-        Title = "Execute TBI House Cloner", -- Button name
-        Description = "Load TBI House Cloner script.", -- Description
+    -- TBI HOUSE CLONER
+    Tabs.ScriptHub:AddButton({
+        Title = "Execute TBI House Cloner",
+        Description = "Load TBI House Cloner script.",
         Callback = function()
             loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/a1785d95674fad4fef000612f70f2608.lua"))()
-            print("TBI House Cloner executed.")
         end
     })
 end
 
--- UI Visual Tab
+-- AUTOFARM TAB
 do
+    -- TBI ICE DIMENSION FARM
+    Tabs.AutoFarm:AddButton({
+        Title = "Execute TBI Ice Dimension Farm",
+        Description = "Load TBI Ice Dimension Farm script.",
+        Callback = function()
+            loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/101333658c343905d93a1433b9916ebc.lua"))()
+        end
+    })
+
+    -- Toggle for Circle Teleportation
+    local CircleTeleportationActive = false
+
+    local CircleToggle = Tabs.AutoFarm:AddToggle("CircleTeleportation", 
+    {
+        Title = "Toggle Circle Teleportation",
+        Description = "Turn off or on circle teleportation to: workspace.Interiors.IceDimension.JoinZones.IceCubeHillMinigame.Ring",
+        Default = false,
+        Callback = function(state)
+            CircleTeleportationActive = state
+            
+            if state then
+                print("Circle Teleportation Enabled")
+
+                -- Start teleportation logic in a spawn thread to avoid blocking the UI
+                spawn(function() 
+                    while CircleTeleportationActive do
+                        local player = game.Players.LocalPlayer
+                        if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                            player.Character.HumanoidRootPart.CFrame = workspace.Interiors.IceDimension.JoinZones.IceCubeHillMinigame.Ring.CFrame
+                        end
+
+                        -- Wait for 7 seconds before the next teleport
+                        wait(7)
+                    end
+                end)
+
+                print("Circle Teleportation Stopped")
+            else
+                print("Circle Teleportation Disabled")
+            end
+        end 
+    })
+end
+
+-- UI VISUAL TAB
+do
+    -- CANDY DISPLAY
     Tabs.Visuals:AddButton({
-        Title = "Execute Candy Display", -- Button name
-        Description = "Load Candy Display UI.", -- Description
+        Title = "Execute Candy Display",
+        Description = "Load Candy Display UI.",
         Callback = function()
             loadstring(game:HttpGet("https://raw.githubusercontent.com/UnclesVan/AdoptMeHalloWeenUis/refs/heads/main/CandyUiLoader.lua"))()
-            print("Candy Display executed.")
         end
     })
 
+    -- SHARDS DISPLAY
     Tabs.Visuals:AddButton({
-        Title = "Execute Shards Display", -- Button name
-        Description = "Load Shards Display UI.", -- Description
+        Title = "Execute Shards Display",
+        Description = "Load Shards Display UI.",
         Callback = function()
             loadstring(game:HttpGet("https://raw.githubusercontent.com/UnclesVan/AdoptMeHalloWeenUis/refs/heads/main/ShardsDisplay"))()
-            print("Shards Display executed.")
         end
     })
 
+    -- CIRCLE DISPLAY
     Tabs.Visuals:AddButton({
-        Title = "Execute Circle Timer Display", -- Button name
-        Description = "Load Circle Timer UI.", -- Description
+        Title = "Execute Circle Timer Display",
+        Description = "Load Circle Timer UI.",
         Callback = function()
             loadstring(game:HttpGet("https://raw.githubusercontent.com/UnclesVan/AdoptMeHalloWeenUis/refs/heads/main/CircleTimer"))()
-            print("Circle Timer executed.")
         end
     })
 end
