@@ -1,0 +1,111 @@
+local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
+local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
+
+local Window = Fluent:CreateWindow({
+    Title = "Fluent " .. Fluent.Version,
+    SubTitle = "by dawid",
+    TabWidth = 160,
+    Size = UDim2.fromOffset(580, 460),
+    Acrylic = true,
+    Theme = "Dark",
+    MinimizeKey = Enum.KeyCode.LeftControl
+})
+
+local Tabs = {
+    AutoFarm = Window:AddTab({ Title = "Auto Farm", Icon = "money" }),
+    Visuals = Window:AddTab({ Title = "UI Visual", Icon = "paintbrush" })
+}
+
+-- Auto Farm Tab
+do
+    Tabs.AutoFarm:AddButton({
+        Title = "Execute Prodigy X Script", -- Button name
+        Description = "Load Prodigy X script from GitHub.", -- Description
+        Callback = function()
+            loadstring(game:HttpGet('https://raw.githubusercontent.com/ReQiuYTPL/hub/main/ReQiuYTPLHub.lua', true))()
+            print("Prodigy X Script executed.")
+        end
+    })
+
+    Tabs.AutoFarm:AddButton({
+        Title = "Execute TBI Ice Dimension Farm", -- Button name
+        Description = "Load TBI Ice Dimension Farm script.", -- Description
+        Callback = function()
+            loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/101333658c343905d93a1433b9916ebc.lua"))()
+            print("TBI Ice Dimension Farm executed.")
+        end
+    })
+
+    Tabs.AutoFarm:AddButton({
+        Title = "Execute TBI Pet Farm", -- Button name
+        Description = "Load TBI Pet Farm script.", -- Description
+        Callback = function()
+            loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/c29af06acdb7a80fb239415fd322efe9.lua"))()
+            print("TBI Pet Farm executed.")
+        end
+    })
+
+    Tabs.AutoFarm:AddButton({
+        Title = "Execute TBI House Cloner", -- Button name
+        Description = "Load TBI House Cloner script.", -- Description
+        Callback = function()
+            loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/a1785d95674fad4fef000612f70f2608.lua"))()
+            print("TBI House Cloner executed.")
+        end
+    })
+end
+
+-- UI Visual Tab
+do
+    Tabs.Visuals:AddButton({
+        Title = "Execute Candy Display", -- Button name
+        Description = "Load Candy Display UI.", -- Description
+        Callback = function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/UnclesVan/AdoptMeHalloWeenUis/refs/heads/main/CandyUiLoader.lua"))()
+            print("Candy Display executed.")
+        end
+    })
+
+    Tabs.Visuals:AddButton({
+        Title = "Execute Shards Display", -- Button name
+        Description = "Load Shards Display UI.", -- Description
+        Callback = function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/UnclesVan/AdoptMeHalloWeenUis/refs/heads/main/ShardsDisplay"))()
+            print("Shards Display executed.")
+        end
+    })
+
+    Tabs.Visuals:AddButton({
+        Title = "Execute Circle Timer Display", -- Button name
+        Description = "Load Circle Timer UI.", -- Description
+        Callback = function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/UnclesVan/AdoptMeHalloWeenUis/refs/heads/main/CircleTimer"))()
+            print("Circle Timer executed.")
+        end
+    })
+end
+
+-- Initialize SaveManager and InterfaceManager
+do
+    SaveManager:SetLibrary(Fluent)
+    InterfaceManager:SetLibrary(Fluent)
+
+    SaveManager:IgnoreThemeSettings()
+    SaveManager:SetIgnoreIndexes({})
+    InterfaceManager:SetFolder("FluentScriptHub")
+    SaveManager:SetFolder("FluentScriptHub/specific-game")
+
+    InterfaceManager:BuildInterfaceSection(Tabs.Visuals)
+    SaveManager:BuildConfigSection(Tabs.Visuals)
+end
+
+-- Notify the user that the script is loaded
+Fluent:Notify({
+    Title = "Fluent",
+    Content = "The script has been successfully loaded.",
+    Duration = 8
+})
+
+-- Load the autoload config if there is one
+SaveManager:LoadAutoloadConfig()
