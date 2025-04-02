@@ -16,7 +16,7 @@ local Tabs = {
     ScriptHub = Window:AddTab({ Title = "Script Hub", Icon = "leaf" }),
     AutoFarm = Window:AddTab({ Title = "Auto Farm", Icon = "money" }),
     Visuals = Window:AddTab({ Title = "UI Visual", Icon = "paintbrush" }),
-    AutoBuy = Window:AddTab({ Title = "Auto Buy", Icon = "shopping-cart" }) -- Add Auto Buy tab
+    AutoBuy = Window:AddTab({ Title = "Auto Buy", Icon = "shopping-cart" })
 }
 
 -- SCRIPT HUB TAB
@@ -79,8 +79,18 @@ do
                                            and workspace.Interiors.IceDimension.JoinZones.IceCubeHillMinigame:FindFirstChild("Ring")
 
                         if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                            -- Teleport the player to the Ring if it exists
                             if targetRing then
                                 player.Character.HumanoidRootPart.CFrame = targetRing.CFrame
+                            end
+                        end
+
+                        -- Teleport all models in workspace.Pets
+                        for _, petModel in pairs(workspace.Pets:GetChildren()) do
+                            if petModel:IsA("Model") and petModel:FindFirstChild("HumanoidRootPart") then
+                                -- Teleport the pet to the Ring
+                                local petRootPart = petModel.HumanoidRootPart
+                                petRootPart.CFrame = targetRing.CFrame
                             end
                         end
 
