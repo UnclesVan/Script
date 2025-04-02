@@ -87,6 +87,7 @@ do
                         wait(7)
                     end
                 end)
+
                 print("Circle Teleportation Started")
             else
                 print("Circle Teleportation Disabled")
@@ -124,10 +125,89 @@ end
 
 -- AUTO BUY TAB
 do
+    local selectedItem
+    local amountToBuy
+
+    -- Dropdown for selecting items to buy
+    local Dropdown = Tabs.AutoBuy:AddDropdown("ItemSelection", {
+        Title = "Select Item to Buy",
+        Description = "Choose an item to auto buy.",
+        Values = {
+            "ice_dimension_2025_subzero_popsicle_bait", 
+            "ice_dimension_2025_shiver_cone_bait"
+        },
+        Multi = false,
+        Default = 1,
+        Callback = function(Value)
+            selectedItem = Value
+            print("Selected item:", Value)
+        end
+    })
+
+    -- Input for the amount of items to buy
+    local AmountInput = Tabs.AutoBuy:AddInput("BuyAmount", {
+        Title = "Amount to Buy",
+        Placeholder = "Enter amount",
+        RemoveTextAfterFocusLost = true,
+        Callback = function(amount)
+            amountToBuy = tonumber(amount) or 1 -- Default to 1 if invalid input
+            print("Amount to buy set to:", amountToBuy)
+        end
+    })
+
+    -- Auto Buy Toggle
+    local autoBuyEnabled = false
+    Tabs.AutoBuy:AddToggle("AutoBuyEnabled", {
+        Title = "Enable Auto Buy",
+        Description = "Automatically buy the selected item.",
+        Default = false,
+        Callback = function(state)
+            autoBuyEnabled = state
+            if state then
+                spawn(function()
+                    while autoBuyEnabled do
+                        if selectedItem and amountToBuy then
+                            local args = {
+                                [1] = "food",  -- Change to "gifts" if purchasing the fire sticker pack instead
+                                [2] = selectedItem,
+                                [3] = {
+                                    ["buy_count"] = amountToBuy
+                                }
+                            }
+                            game:GetService("ReplicatedStorage"):WaitForChild("API"):WaitForChild("ShopAPI/BuyItem"):InvokeServer(unpack(args))
+                        end
+                        wait(2) -- Wait time between purchases
+                    end
+                end)
+            end
+        end
+    })
+
+    -- Auto Open Toggle for Fire Sticker Pack
+    local autoOpenEnabled = false
+    Tabs.AutoBuy:AddToggle("AutoOpenStickerPack", {
+        Title = "Auto Open Fire Sticker Pack",
+        Description = "Automatically open the fire sticker pack.",
+        Default = false,
+        Callback = function(state)
+            autoOpenEnabled = state
+            if state then
+                spawn(function()
+                    while autoOpenEnabled do
+                        local args = {
+                            [1] = "ice_dimension_2025_fire_dimension_sticker_pack",
+                        }
+                        game:GetService("ReplicatedStorage"):WaitForChild("API"):WaitForChild("LootBoxAPI/ExchangeItemForReward"):InvokeServer(unpack(args))
+                        wait(2) -- Adjust the wait time as necessary
+                    end
+                end)
+            end
+        end
+    })
+
+    -- Auto Buy for Fire Sticker Pack
     local fireStickerEnabled = false
     local fireStickerAmount = 1
-
-    -- Auto Buy for fire sticker pack with amount selection
     Tabs.AutoBuy:AddToggle("AutoBuyFireSticker", {
         Title = "Auto Buy Fire Sticker Pack",
         Description = "Automatically buy the fire sticker pack.",
@@ -160,28 +240,6 @@ do
         Callback = function(amount)
             fireStickerAmount = tonumber(amount) or 1 -- Default to 1 if invalid input
             print("Fire sticker pack amount set to:", fireStickerAmount)
-        end
-    })
-
-    -- Auto Open Toggle for fire sticker pack
-    local autoOpenEnabled = false
-    Tabs.AutoBuy:AddToggle("AutoOpenStickerPack", {
-        Title = "Auto Open Fire Sticker Pack",
-        Description = "Automatically open the fire sticker pack.",
-        Default = false,
-        Callback = function(state)
-            autoOpenEnabled = state
-            if state then
-                spawn(function()
-                    while autoOpenEnabled do
-                        local args = {
-                            [1] = "ice_dimension_2025_fire_dimension_sticker_pack",
-                        }
-                        game:GetService("ReplicatedStorage"):WaitForChild("API"):WaitForChild("LootBoxAPI/ExchangeItemForReward"):InvokeServer(unpack(args))
-                        wait(2) -- Adjust the wait time as necessary
-                    end
-                end)
-            end
         end
     })
 
