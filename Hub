@@ -15,12 +15,12 @@ local Window = Fluent:CreateWindow({
 local Tabs = {
     ScriptHub = Window:AddTab({ Title = "Script Hub", Icon = "leaf" }),
     AutoFarm = Window:AddTab({ Title = "Auto Farm", Icon = "money" }),
-    Visuals = Window:AddTab({ Title = "UI Visual", Icon = "paintbrush" })
+    Visuals = Window:AddTab({ Title = "UI Visual", Icon = "paintbrush" }),
+    AutoBuy = Window:AddTab({ Title = "Auto Buy", Icon = "shopping-cart" }) -- Add Auto Buy tab
 }
 
 -- SCRIPT HUB TAB
 do
-    -- Prodigy X Script
     Tabs.ScriptHub:AddButton({
         Title = "Execute Prodigy X Script",
         Description = "Load Prodigy X script from GitHub.",
@@ -29,7 +29,6 @@ do
         end
     })
 
-    -- TBI PET FARM
     Tabs.ScriptHub:AddButton({
         Title = "Execute TBI Pet Farm",
         Description = "Load TBI Pet Farm script.",
@@ -38,7 +37,6 @@ do
         end
     })
 
-    -- TBI HOUSE CLONER
     Tabs.ScriptHub:AddButton({
         Title = "Execute TBI House Cloner",
         Description = "Load TBI House Cloner script.",
@@ -50,7 +48,6 @@ end
 
 -- AUTOFARM TAB
 do
-    -- TBI ICE DIMENSION FARM
     Tabs.AutoFarm:AddButton({
         Title = "Execute TBI Ice Dimension Farm",
         Description = "Load TBI Ice Dimension Farm script.",
@@ -59,7 +56,6 @@ do
         end
     })
 
-    -- Toggle for Circle Teleportation
     local CircleTeleportationActive = false
 
     local CircleToggle = Tabs.AutoFarm:AddToggle("CircleTeleportation", 
@@ -73,7 +69,6 @@ do
             if state then
                 print("Circle Teleportation Enabled")
 
-                -- Start teleportation logic in a spawn thread to avoid blocking the UI
                 spawn(function() 
                     while CircleTeleportationActive do
                         local player = game.Players.LocalPlayer
@@ -84,17 +79,14 @@ do
                                            and workspace.Interiors.IceDimension.JoinZones.IceCubeHillMinigame:FindFirstChild("Ring")
 
                         if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                            -- Teleport to the Ring if it exists
                             if targetRing then
                                 player.Character.HumanoidRootPart.CFrame = targetRing.CFrame
                             end
                         end
 
-                        -- Wait for 7 seconds before the next teleport attempt
                         wait(7)
                     end
                 end)
-
                 print("Circle Teleportation Started")
             else
                 print("Circle Teleportation Disabled")
@@ -105,7 +97,6 @@ end
 
 -- UI VISUAL TAB
 do
-    -- CANDY DISPLAY
     Tabs.Visuals:AddButton({
         Title = "Execute Candy Display",
         Description = "Load Candy Display UI.",
@@ -114,7 +105,6 @@ do
         end
     })
 
-    -- SHARDS DISPLAY
     Tabs.Visuals:AddButton({
         Title = "Execute Shards Display",
         Description = "Load Shards Display UI.",
@@ -123,12 +113,84 @@ do
         end
     })
 
-    -- CIRCLE DISPLAY
     Tabs.Visuals:AddButton({
         Title = "Execute Circle Timer Display",
         Description = "Load Circle Timer UI.",
         Callback = function()
             loadstring(game:HttpGet("https://raw.githubusercontent.com/UnclesVan/AdoptMeHalloWeenUis/refs/heads/main/CircleTimer"))()
+        end
+    })
+end
+
+-- AUTO BUY TAB
+do
+    local fireStickerEnabled = false
+    local fireStickerAmount = 1
+
+    -- Auto Buy for fire sticker pack with amount selection
+    Tabs.AutoBuy:AddToggle("AutoBuyFireSticker", {
+        Title = "Auto Buy Fire Sticker Pack",
+        Description = "Automatically buy the fire sticker pack.",
+        Default = false,
+        Callback = function(state)
+            fireStickerEnabled = state
+            if state then
+                spawn(function()
+                    while fireStickerEnabled do
+                        local args = {
+                            [1] = "gifts",
+                            [2] = "ice_dimension_2025_fire_dimension_sticker_pack",
+                            [3] = {
+                                ["buy_count"] = fireStickerAmount
+                            }
+                        }
+                        game:GetService("ReplicatedStorage"):WaitForChild("API"):WaitForChild("ShopAPI/BuyItem"):InvokeServer(unpack(args))
+                        wait(2) -- Adjust the wait time as necessary
+                    end
+                end)
+            end
+        end
+    })
+
+    -- Input for the amount of fire sticker packs to buy
+    Tabs.AutoBuy:AddInput("FireStickerAmount", {
+        Title = "Amount to Buy Fire Sticker Pack",
+        Placeholder = "Enter amount",
+        RemoveTextAfterFocusLost = true,
+        Callback = function(amount)
+            fireStickerAmount = tonumber(amount) or 1 -- Default to 1 if invalid input
+            print("Fire sticker pack amount set to:", fireStickerAmount)
+        end
+    })
+
+    -- Auto Open Toggle for fire sticker pack
+    local autoOpenEnabled = false
+    Tabs.AutoBuy:AddToggle("AutoOpenStickerPack", {
+        Title = "Auto Open Fire Sticker Pack",
+        Description = "Automatically open the fire sticker pack.",
+        Default = false,
+        Callback = function(state)
+            autoOpenEnabled = state
+            if state then
+                spawn(function()
+                    while autoOpenEnabled do
+                        local args = {
+                            [1] = "ice_dimension_2025_fire_dimension_sticker_pack",
+                        }
+                        game:GetService("ReplicatedStorage"):WaitForChild("API"):WaitForChild("LootBoxAPI/ExchangeItemForReward"):InvokeServer(unpack(args))
+                        wait(2) -- Adjust the wait time as necessary
+                    end
+                end)
+            end
+        end
+    })
+
+    -- Dehash Remotes Button
+    Tabs.AutoBuy:AddButton({
+        Title = "Dehash Remotes",
+        Description = "Dehash remotes using a script.",
+        Callback = function()
+            loadstring(game:HttpGet('https://raw.githubusercontent.com/UnclesVan/AdoPtMe-/refs/heads/main/dehashwithslashinmiddle'))()
         end
     })
 end
