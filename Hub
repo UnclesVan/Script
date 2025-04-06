@@ -119,6 +119,181 @@ do
             end
         end 
     })
+
+    -- Toggle for Sakura Swoop Minigame Farm
+    local sakuraSwoopActive = false
+
+    local SakuraToggle = Tabs.AutoFarm:AddToggle("SakuraSwoopMinigameFarm", 
+    {
+        Title = "Toggle Sakura Swoop Minigame Farm",
+        Description = "Enable or disable Sakura Swoop Minigame farming.",
+        Default = false,
+        Callback = function(state)
+            sakuraSwoopActive = state
+            
+            if state then
+                print("Sakura Swoop Minigame Farm Enabled")
+
+                spawn(function()
+                    local player = game.Players.LocalPlayer
+                    local character = player.Character or player.CharacterAdded:Wait()
+                    local humanoidRootPart = character:WaitForChild("HumanoidRootPart")  -- Ensure the HumanoidRootPart is defined
+                    local playerGui = player:WaitForChild("PlayerGui")  -- Reference to PlayerGui
+
+                    -- Function to convert timer from the UI string to a number
+                    local function getTimeRemaining()
+                        local timerLabel = playerGui:FindFirstChild("MinigameInGameApp")
+                            and playerGui.MinigameInGameApp:FindFirstChild("Body")
+                            and playerGui.MinigameInGameApp.Body:FindFirstChild("Left")
+                            and playerGui.MinigameInGameApp.Body.Left.Container:FindFirstChild("ValueLabel")
+
+                        if timerLabel and tonumber(timerLabel.Text) then
+                            return tonumber(timerLabel.Text)  -- Return the number of seconds
+                        end
+                        return nil  -- Return nil if ValueLabel is not found or not a number
+                    end
+
+                    local hasTeleportedToJoinZone = false  -- Flag to track if we have teleported
+
+                    while sakuraSwoopActive do
+                        -- Check if there are any children under workspace.Interiors
+                        local interiors = workspace:FindFirstChild("Interiors")
+                        if not interiors or #interiors:GetChildren() == 0 then
+                            print("No items found in workspace.Interiors! Stopping all teleportation.")
+                            wait(1)  -- Delay before the next scan attempt
+                            continue -- Restart the loop to keep scanning
+                        end
+
+                        -- Check if we need to teleport to the JoinZone
+                        if not hasTeleportedToJoinZone then
+                            local joinZone = workspace.Interiors:FindFirstChild("MainMap!Default"):FindFirstChild("BlossomShakedownJoinZone"):FindFirstChild("Ring")
+
+                            if joinZone then
+                                -- Teleport to the JoinZone location once
+                                humanoidRootPart.CFrame = joinZone.CFrame
+                                print("Teleported to Ring at BlossomShakedownJoinZone.")
+                                hasTeleportedToJoinZone = true  -- Set the flag to true to prevent further teleportation
+                                wait(1)  -- Optional: Wait a moment after teleporting 
+                            else
+                                print("Destination Ring not found in BlossomShakedownJoinZone!")
+                            end
+                        end
+
+                        print("Scanning for: Interiors.BlossomShakedownInterior")
+
+                        -- Attempt to find the BlossomShakedownInterior model
+                        local blossomShakedownInterior = interiors:FindFirstChild("BlossomShakedownInterior")
+
+                        if blossomShakedownInterior then
+                            print("BlossomShakedownInterior model found.")
+
+                            -- Search for the paraglider
+                            print("Searching for: Interiors.BlossomShakedownInterior.GliderInteractions > spring_2025_default_paraglider")
+                            local paraglider = blossomShakedownInterior.GliderInteractions:FindFirstChild("spring_2025_default_paraglider")
+                            local collisionPart = paraglider and paraglider:FindFirstChild("Collision")
+
+                            if collisionPart then
+                                -- Teleport to the Collision part's position
+                                humanoidRootPart.CFrame = collisionPart.CFrame
+                                print("Teleported to Collision part of Paraglider:", collisionPart.Name)
+                                wait(7)  -- Wait for 7 seconds at this position
+                            else
+                                print("Collision part of Paraglider not found!")
+                            end
+
+                            local foundPetal = false  -- Flag to check if a Petal was found
+
+                            -- Iterate through all models in the Rings
+                            local rings = blossomShakedownInterior:FindFirstChild("Rings")
+                            if rings then
+                                for _, ringModel in ipairs(rings:GetChildren()) do
+                                    if ringModel:IsA("Model") then
+                                        print("Checking ring model:", ringModel.Name)
+
+                                        for _, nestedModel in ipairs(ringModel:GetChildren()) do
+                                            if nestedModel:IsA("Model") then
+                                                local petal = nestedModel:FindFirstChild("Petal")
+                                                if petal and petal:IsA("MeshPart") then
+                                                    foundPetal = true
+                                                    humanoidRootPart.CFrame = petal.CFrame
+                                                    print("Teleporting to Petal:", petal.Name)
+                                                    wait(0.5)  -- Wait briefly to allow for the teleportation
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+
+                                if not foundPetal then
+                                    print("No Petals found.")
+                                end
+
+                                -- Teleport to Ring Spawns if they exist
+                                print("Teleporting to Ring Spawns...")
+                                local foundRingSpawn = false
+                                local ringSpawns = blossomShakedownInterior:FindFirstChild("RingSpawns")
+                                if ringSpawns then
+                                    for _, ringSpawn in ipairs(ringSpawns:GetChildren()) do
+                                        if ringSpawn:IsA("Part") then
+                                            foundRingSpawn = true
+                                            humanoidRootPart.CFrame = ringSpawn.CFrame  -- Teleport to the Ring Spawn's position
+                                            print("Teleporting to Ring Spawn:", ringSpawn.Name)
+                                            wait(0.5)  -- Adjust the wait time for controlled teleport speed
+                                        end
+                                    end
+                                else
+                                    print("No Ring Spawns found.")
+                                end
+                            else
+                                print("Rings model not found!")
+                            end
+                        else
+                            print("BlossomShakedownInterior model not found! Continuing to scan...")
+                            wait(1)  -- Delay before retrying the scan
+                            continue  -- Restart the loop to keep scanning
+                        end
+
+                        -- Updraft Button Check using the provided path
+                        print("Searching for: Updraft Button")
+                        local updraftButton = playerGui:FindFirstChild("MinigameHotbarApp")
+                            and playerGui.MinigameHotbarApp:FindFirstChild("Hotbar")
+                            and playerGui.MinigameHotbarApp.Hotbar:FindFirstChild("UpdraftButton")
+                            and playerGui.MinigameHotbarApp.Hotbar.UpdraftButton:FindFirstChild("Button")
+
+                        if updraftButton then
+                            pcall(function()
+                                for _, connection in pairs(getconnections(updraftButton.MouseButton1Down)) do
+                                    connection:Fire()
+                                end
+                                for _, connection in pairs(getconnections(updraftButton.MouseButton1Click)) do
+                                    connection:Fire()
+                                end
+                                for _, connection in pairs(getconnections(updraftButton.MouseButton1Up)) do
+                                    connection:Fire()
+                                end
+                            end)
+                            print("Updraft Button activated.")
+                        else
+                            print("Updraft Button not found in PlayerGui!")
+                        end
+
+                        -- Check timer; reset loop if more than 30 seconds have passed
+                        local timeRemaining = getTimeRemaining()
+                        if timeRemaining and timeRemaining <= 30 then
+                            print("30 seconds reached. Resetting loop to scan again.")
+                            wait(1)  -- Optional: Delay before scanning again
+                        end
+
+                        wait(1)  -- Pause before scanning again
+                    end
+                end)
+
+                print("Sakura Swoop Minigame Farm Started")
+            else
+                print("Sakura Swoop Minigame Farm Disabled")
+            end
+        end 
+    })
 end
 
 -- UI VISUAL TAB
