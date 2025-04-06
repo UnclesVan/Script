@@ -57,32 +57,47 @@ do
     })
 
     local CircleTeleportationActive = false
+    local delayTime = 7  -- Default wait time
+
+    -- Input for teleportation delay
+    local delayInput = Tabs.AutoFarm:AddInput("TeleportDelayInput", {
+        Title = "Teleport Delay (seconds)",
+        Placeholder = "Enter delay in seconds",
+        RemoveTextAfterFocusLost = true,
+        Callback = function(inputValue)
+            delayTime = tonumber(inputValue) or 7  -- Default to 7 if invalid input
+            print("Teleport delay set to:", delayTime)
+        end,
+    })
 
     local CircleToggle = Tabs.AutoFarm:AddToggle("CircleTeleportation", 
     {
         Title = "Toggle Circle Teleportation",
-        Description = "Turn off or on circle teleportation to: workspace.Interiors.IceDimension.JoinZones.IceCubeHillMinigame.Ring",
+        Description = "Turn off or on circle teleportation to: workspace.Interiors['MainMap!Default'].BlossomShakedownJoinZone.Ring",
         Default = false,
         Callback = function(state)
             CircleTeleportationActive = state
             
             if state then
                 print("Circle Teleportation Enabled")
-
+                
                 spawn(function() 
                     while CircleTeleportationActive do
                         local player = game.Players.LocalPlayer
                         local targetRing = workspace:FindFirstChild("Interiors") 
-                                           and workspace.Interiors:FindFirstChild("IceDimension") 
-                                           and workspace.Interiors.IceDimension:FindFirstChild("JoinZones") 
-                                           and workspace.Interiors.IceDimension.JoinZones:FindFirstChild("IceCubeHillMinigame") 
-                                           and workspace.Interiors.IceDimension.JoinZones.IceCubeHillMinigame:FindFirstChild("Ring")
+                                           and workspace.Interiors:FindFirstChild("MainMap!Default") 
+                                           and workspace.Interiors["MainMap!Default"]:FindFirstChild("BlossomShakedownJoinZone") 
+                                           and workspace.Interiors["MainMap!Default"].BlossomShakedownJoinZone:FindFirstChild("Ring")
 
                         if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
                             -- Teleport the player to the Ring if it exists
                             if targetRing then
                                 player.Character.HumanoidRootPart.CFrame = targetRing.CFrame
+                            else
+                                print("Target ring not found") -- Debugging message
                             end
+                        else
+                            print("Player or character not ready") -- Debugging message
                         end
 
                         -- Teleport all models in workspace.Pets
@@ -94,7 +109,7 @@ do
                             end
                         end
 
-                        wait(7)
+                        wait(delayTime)  -- Use the input value for the wait time
                     end
                 end)
 
