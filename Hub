@@ -1,3 +1,106 @@
+
+-- Client-side script (LocalScript in StarterGui or a ScreenGui within PlayerGui)
+
+-- GUI Elements (created dynamically)
+local Player = game.Players.LocalPlayer
+local PlayerGui = Player:WaitForChild("PlayerGui")
+
+-- Create GUI Elements
+local ba = Instance.new("ScreenGui")
+local ca = Instance.new("TextLabel") -- Main Label
+local ab = Instance.new("TextLabel") -- Status Label
+local afkTimerLabel = Instance.new("TextLabel") -- Timer label
+
+-- Properties
+ba.Name = "ba"
+ba.Parent = PlayerGui
+ba.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+-- Setup main label properties
+ca.Name = "ca"
+ca.Parent = ba
+ca.Active = true
+ca.BackgroundTransparency = 1
+ca.Position = UDim2.new(0.01, 0, 0.01, 0)
+ca.Size = UDim2.new(0, 500, 0, 120)
+ca.Font = Enum.Font.SourceSansSemibold
+ca.Text = "Anti AFK Script"
+ca.TextColor3 = Color3.new(0, 1, 0)
+ca.TextSize = 64
+ca.TextStrokeTransparency = 0
+ca.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+ca.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Setup status label properties
+ab.Name = "ab"
+ab.Parent = ba
+ab.BackgroundTransparency = 1
+ab.Position = UDim2.new(0.01, 0, 0.2, 0)
+ab.Size = UDim2.new(0, 500, 0, 120)
+ab.Font = Enum.Font.ArialBold
+ab.Text = "Status: Active"
+ab.TextColor3 = Color3.new(0, 1, 0)
+ab.TextStrokeTransparency = 0
+ab.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+ab.TextSize = 64
+ab.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Setup AFK timer label properties
+afkTimerLabel.Name = "afkTimerLabel"
+afkTimerLabel.Parent = ba
+afkTimerLabel.BackgroundTransparency = 1
+afkTimerLabel.Position = UDim2.new(0.01, 0, 0.39, 0)
+afkTimerLabel.Size = UDim2.new(0, 500, 0, 120)
+afkTimerLabel.Font = Enum.Font.Arial
+afkTimerLabel.Text = "Total Time: 0s"
+afkTimerLabel.TextColor3 = Color3.new(0, 1, 0)
+afkTimerLabel.TextSize = 64
+afkTimerLabel.TextStrokeTransparency = 0
+afkTimerLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+afkTimerLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Anti-AFK Logic: Uses VirtualUser to simulate input
+local VirtualUser = game:GetService("VirtualUser")
+local afkTimer = 0
+
+-- Function to update the AFK timer
+local function updateAfkTimer()
+    while true do
+        task.wait(1)
+        afkTimer = afkTimer + 1
+        afkTimerLabel.Text = "Total Time: " .. afkTimer .. "s"
+    end
+end
+
+-- Start the timer loop in a coroutine
+coroutine.wrap(updateAfkTimer)()
+
+-- Function to handle when the player becomes idle
+local function onIdled()
+    -- Simulate clicking the second mouse button (right-click)
+    VirtualUser:CaptureController()
+    VirtualUser:ClickButton2(Vector2.new())
+
+    ab.Text = "Roblox tried to kick you but I kicked him instead"
+    task.wait(2)
+    ab.Text = "Status: Active"
+end
+
+-- Connect the Idled event to the anti-AFK function
+Player.Idled:Connect(onIdled)
+
+
+
+
+
+
+
+
+
+
+
+
+
 local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
 local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
 local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
