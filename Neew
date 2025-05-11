@@ -1,0 +1,125 @@
+elseif actionInfo.action == "BeachPartyTask" then
+    -- *** BEACH PARTY TASK LOGIC - WITH DOWNLOAD/LOCATION CALLS AND PLATFORM (Targeting workspace.StaticMap) ***
+    print("Action: Beach Party Task initiated!") -- Added print for clarity
+    local replicatedStorage = ReplicatedStorage
+    local downloadsAPI = replicatedStorage:WaitForChild("API"):FindFirstChild("DownloadsAPI/Download")
+    local locationAPI = replicatedStorage:FindFirstChild("API"):FindFirstChild("LocationAPI/SetLocation")
+    local playerGui = localPlayer:WaitForChild("PlayerGui")
+    local interiorsWorkspace = workspace:FindFirstChild("Interiors") -- Check if Interiors exists early
+
+    if not interiorsWorkspace then
+         warn("Warning: workspace.Interiors not found for Beach Party. Cloning/Parenting might fail.")
+    else
+        -- Check if there's anything in workspace.Interiors already, if so remove it. (Still useful for other Interiors)
+        for _, item in ipairs(interiorsWorkspace:GetChildren()) do
+            if item:IsA("BasePart") or item:IsA("Model") then
+                item:Destroy()
+                print("Removed:", item.Name, "from Interiors during Beach Party clean-up.")
+            end
+        end
+    end
+
+
+    -- Call Download API for "MainMap!Default" (Still needed to load map assets)
+    if downloadsAPI then
+        local downloadArgs = {"Interiors", "MainMap!Default"} -- Assuming this download is still needed
+        downloadsAPI:InvokeServer(table.unpack(downloadArgs))
+        print("Invoked Server for MainMap!Default download for Beach Party.")
+    else
+        print("Error: DownloadsAPI/Download not found for Beach Party.")
+    end
+
+    -- Call Location API for "MainMap" with "Default" (Still needed to set player location context)
+    if locationAPI then
+        local locationArgs = {"MainMap", "Default"}
+        locationAPI:FireServer(table.unpack(locationArgs))
+        print("Fired Server to set location to MainMap with Default for Beach Party.")
+    else
+        print("Error: LocationAPI/SetLocation not found for Beach Party.")
+    end
+
+    -- Wait for the model in PlayerGui, CLONE it, and move the clone to workspace.Interiors
+    -- The model name in PlayerGui is "MainMap!Default"
+    print("Attempting to wait for 'MainMap!Default' in PlayerGui...")
+    local mainMapDefaultModelInGui = playerGui:WaitForChild("MainMap!Default", 15) -- Increased timeout slightly
+
+    if mainMapDefaultModelInGui then
+        print("Found 'MainMap!Default' in PlayerGui. Path:", mainMapDefaultModelInGui:GetFullName())
+
+        if interiorsWorkspace then
+            local success, err = pcall(function()
+                local mainMapDefaultModelClone = mainMapDefaultModelInGui:Clone() -- *** CLONE THE MODEL ***
+                mainMapDefaultModelClone.Parent = interiorsWorkspace -- *** PARENT THE CLONE ***
+                print("Cloned MainMap!Default model from PlayerGui and successfully moved clone to Interiors.")
+                print("Cloned model path in workspace:", mainMapDefaultModelClone:GetFullName())
+
+                -- Teleport to workspace.StaticMap.Beach.BeachPartyAilmentTarget
+                local staticMapFolder = workspace:FindFirstChild("StaticMap")
+                local beachFolder = staticMapFolder and staticMapFolder:FindFirstChild("Beach")
+                local teleportTargetPart = beachFolder and beachFolder:FindFirstChild("BeachPartyAilmentTarget")
+
+                if localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart") and teleportTargetPart then
+                    local humanoidRootPart = localPlayer.Character.HumanoidRootPart
+                    local teleportPosition = teleportTargetPart.Position -- Get the exact position of the target part
+
+                     -- *** CREATE THE LARGE PLATFORM ***
+                    local platformSize = Vector3.new(200, 1, 200) -- Adjust size as needed for a large baseplate
+                    local platform = Instance.new("Part")
+                    platform.Size = platformSize
+                    -- Position the platform so the teleport target is roughly in the center
+                    platform.Position = teleportPosition - Vector3.new(0, platform.Size.Y/2 + 0.1, 0) -- Position slightly below the target
+                    platform.Color = Color3.new(0.7, 0.7, 0.7) -- A neutral grey color for a baseplate
+                    platform.Material = Enum.Material.Plastic -- Or another material like Grass or Sand
+                    platform.Anchored = true
+                    platform.CanCollide = true
+                    platform.Parent = workspace -- Or a specific folder in workspace if you prefer
+                    print("Created large platform at:", platform.Position)
+                    -- *** END PLATFORM CREATION ***
+
+
+                    -- Teleport to the position of the target part, with a small offset upwards
+                    humanoidRootPart.CFrame = CFrame.new(teleportPosition + Vector3.new(0, localPlayer.Character.Humanoid.HipHeight + 0.5, 0)) -- Adjust offset as needed
+                    print("Teleported to Beach Party teleport target:", teleportTargetPart.Name)
+                    print("Full target path:", teleportTargetPart:GetFullName()) -- Added print for verification
+
+
+                    -- *** ADD ANY POST-TELEPORT BEACH PARTY ACTIONS HERE ***
+                    -- E.g., sitting on a beach towel, interacting with party items, calling another API
+                    -- print("Add any actions needed after teleporting to the Beach Party!")
+
+                else
+                    print("Error: Could not find Beach Party teleport target part ('BeachPartyAilmentTarget') at path workspace.StaticMap.Beach.BeachPartyAilmentTarget or Character/HRP missing.")
+                    if not staticMapFolder then
+                        print("Debug: Did not find 'StaticMap' in workspace.")
+                    elseif staticMapFolder and not beachFolder then
+                        print("Debug: Did not find 'Beach' in StaticMap.")
+                    elseif beachFolder and not teleportTargetPart then
+                        print("Debug: Did not find 'BeachPartyAilmentTarget' in Beach.")
+                    end
+                end
+
+                -- *** ADD FORMAL TASK COMPLETION SIGNAL HERE ***
+                -- This might be done via a server API call after teleporting and/or interacting
+                -- local taskCompletedEvent = ReplicatedStorage:FindFirstChild("TaskCompleted")
+                -- if taskCompletedEvent then
+                --     taskCompletedEvent:FireServer("BeachPartyTask")
+                --     print("Fired server to signal Beach Party Task completion.")
+                -- else
+                --     print("Warning: TaskCompleted RemoteEvent not found.")
+                -- end
+
+            end) -- End pcall for cloning/parenting
+
+            if not success then
+                warn("Error during cloning/parenting for Beach Party:", err)
+            end
+
+        else
+            warn("workspace.Interiors was not found for parenting the Beach Party model.")
+        end
+
+
+    else
+        warn("Error: 'MainMap!Default' model not found in PlayerGui after download attempt for Beach Party Task (timed out waiting).")
+        -- You might want to add logic here to retry the download or handle the failure
+    end
